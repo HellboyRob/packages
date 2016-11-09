@@ -6,7 +6,7 @@
 %{!?kversion: %define kversion 2.6.18-398.el5}
 
 Name:    %{kmod_name}-kmod
-Version: 346.35
+Version: 367.57
 Release: 1%{?dist}
 Group:   System Environment/Kernel
 License: Proprietary
@@ -22,6 +22,7 @@ Source0:  ftp://download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-Linux-x8
 Source1:  ftp://download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}.run
 
 Source10: kmodtool-%{kmod_name}-el5.sh
+Source15: nvidia-provides.sh
 
 NoSource: 0
 NoSource: 1
@@ -43,6 +44,8 @@ NoSource: 1
 
 # Define the filter.
 %define __find_requires sh %{_builddir}/%{buildsubdir}/filter-requires.sh
+# Define for nvidia-provides
+%define __find_provides %{SOURCE15}
 
 %description
 This package provides the proprietary NVIDIA OpenGL kernel driver module.
@@ -53,6 +56,8 @@ of the same variant of the Linux kernel and not on any one specific build.
 %setup -q -c -T
 echo "/usr/lib/rpm/redhat/find-requires | %{__sed} -e '/^ksym.*/d'" > filter-requires.sh
 echo "override %{kmod_name} * weak-updates/%{kmod_name}" > kmod-%{kmod_name}.conf
+echo "override %{kmod_name}-drm * weak-updates/%{kmod_name}" >> kmod-%{kmod_name}.conf
+echo "override %{kmod_name}-modeset * weak-updates/%{kmod_name}" >> kmod-%{kmod_name}.conf
 %ifarch x86_64
 echo "override %{kmod_name}-uvm * weak-updates/%{kmod_name}" >> kmod-%{kmod_name}.conf
 %endif
@@ -75,11 +80,6 @@ for kvariant in %{kvariants} ; do
     pushd _kmod_build_$kvariant/kernel
     %{__make} module
     popd
-    %ifarch x86_64
-    pushd _kmod_build_$kvariant/kernel/uvm
-    %{__make} module
-    popd
-    %endif
 done
 
 %install
@@ -91,11 +91,6 @@ for kvariant in %{kvariants} ; do
     pushd _kmod_build_$kvariant/kernel
     %{__make} -C "${ksrc}" modules_install M=$PWD
     popd
-    %ifarch x86_64
-    pushd _kmod_build_$kvariant/kernel/uvm
-    %{__make} -C "${ksrc}" modules_install M=$PWD
-    popd
-    %endif
 done
 %{__install} -d %{buildroot}%{_sysconfdir}/depmod.d/
 %{__install} -p -m 0644 kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
@@ -104,6 +99,60 @@ done
 %{__rm} -rf %{buildroot}
 
 %changelog
+* Tue Oct 11 2016 Philip J Perry <phil@elrepo.org> - 367.57-1
+- Updated to version 367.57
+
+* Sat Aug 27 2016 Philip J Perry <phil@elrepo.org> - 367.44-1
+- Updated to version 367.44
+
+* Sat Jul 16 2016 Philip J Perry <phil@elrepo.org> - 367.35-1
+- Updated to version 367.35
+
+* Tue Jun 14 2016 Philip J Perry <phil@elrepo.org> - 367.27-1
+- Updated to version 367.27
+- Adds nvidia-drm kernel module
+
+* Wed May 25 2016 Philip J Perry <phil@elrepo.org> - 361.45.11-1
+- Updated to version 361.45.11
+
+* Thu Mar 31 2016 Philip J Perry <phil@elrepo.org> - 361.42-1
+- Updated to version 361.42
+
+* Tue Mar 01 2016 Philip J Perry <phil@elrepo.org> - 361.28-1
+- Updated to version 361.28
+- Adds nvidia-modeset kernel module
+
+* Sun Jan 31 2016 Philip J Perry <phil@elrepo.org> - 352.79-1
+- Updated to version 352.79
+
+* Fri Nov 20 2015 Philip J Perry <phil@elrepo.org> - 352.63-1
+- Updated to version 352.63
+
+* Sat Oct 17 2015 Philip J Perry <phil@elrepo.org> - 352.55-1
+- Updated to version 352.55
+
+* Sat Aug 29 2015 Philip J Perry <phil@elrepo.org> - 352.41-1
+- Updated to version 352.41
+
+* Sat Aug 01 2015 Philip J Perry <phil@elrepo.org> - 352.30-1
+- Updated to version 352.30
+
+* Fri Jul 03 2015 Philip J Perry <phil@elrepo.org> - 352.21-3
+- Add blacklist() provides.
+- Revert modalias() provides.
+
+* Wed Jul 01 2015 Philip J Perry <phil@elrepo.org> - 352.21-2
+- Add modalias() provides.
+
+* Wed Jun 17 2015 Philip J Perry <phil@elrepo.org> - 352.21-1
+- Updated to version 352.21
+
+* Wed Apr 08 2015 Philip J Perry <phil@elrepo.org> - 346.59-1
+- Updated to version 346.59
+
+* Wed Feb 25 2015 Philip J Perry <phil@elrepo.org> - 346.47-1
+- Updated to version 346.47
+
 * Sat Jan 17 2015 Philip J Perry <phil@elrepo.org> - 346.35-1
 - Updated to version 346.35
 - Drops support of older G8x, G9x, and GT2xx GPUs

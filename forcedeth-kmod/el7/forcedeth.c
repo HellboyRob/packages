@@ -67,11 +67,20 @@
 #include <linux/prefetch.h>
 #include <linux/u64_stats_sync.h>
 #include <linux/io.h>
+#include <linux/version.h>
 
 #include <asm/irq.h>
 
 #define TX_WORK_PER_LOOP  64
 #define RX_WORK_PER_LOOP  64
+
+/* Compatibiliy fixes for RHEL7_2 */
+#if (RHEL_MAJOR == 7 && RHEL_MINOR >= 2)
+#define vlan_tx_tag_get skb_vlan_tag_get
+#define vlan_tx_tag_present skb_vlan_tag_present
+#define u64_stats_fetch_begin_bh u64_stats_fetch_begin_irq
+#define u64_stats_fetch_retry_bh u64_stats_fetch_retry_irq
+#endif
 
 /*
  * Hardware access:

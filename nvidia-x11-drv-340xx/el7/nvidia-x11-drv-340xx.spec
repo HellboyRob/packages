@@ -1,7 +1,7 @@
 # Define the Max Xorg version (ABI) that this driver release supports
 # See README.txt, Chapter 2. Minimum Software Requirements or
-# ftp://download.nvidia.com/XFree86/Linux-x86_64/340.65/README/minimumrequirements.html
-%define		max_xorg_ver	1.17.99
+# ftp://download.nvidia.com/XFree86/Linux-x86_64/340.96/README/minimumrequirements.html
+%define		max_xorg_ver	1.18.99
 
 %define		nvidialibdir	%{_libdir}/nvidia
 %define		nvidialib32dir	%{_prefix}/lib/nvidia
@@ -9,7 +9,7 @@
 %define		debug_package	%{nil}
 
 Name:		nvidia-x11-drv-340xx
-Version:	340.76
+Version:	340.98
 Release:	1%{?dist}
 Group:		User Interface/X Hardware Support
 License:	Distributable
@@ -31,6 +31,10 @@ Source4:	alternate-install-present
 # Fix broken SONAME dependency chain
 Provides: libnvcuvid.so()(64bit)
 Provides: libGL.so()(64bit)
+
+# Provides for CUDA
+Provides:	cuda-driver = %{version}
+Provides:	cuda-drivers = %{version}
 
 # provides desktop-file-install
 BuildRequires:	desktop-file-utils
@@ -416,6 +420,17 @@ fi ||:
 %{_prefix}/lib/vdpau/libvdpau_nvidia.*
 
 %changelog
+* Tue Nov 08 2016 Philip J Perry <phil@elrepo.org> - 340.98-1
+- Updated to version 340.98
+
+* Fri Nov 20 2015 Philip J Perry <phil@elrepo.org> - 340.96-1
+- Updated to version 340.96
+- Adds support for Xorg 1.18 (Video Driver ABI 20)
+
+* Sat Sep 12 2015 Philip J Perry <phil@elrepo.org> - 340.93-1
+- Updated to version 340.93
+- Add CUDA provides
+
 * Thu Feb 05 2015 Philip J Perry <phil@elrepo.org> - 340.76-1
 - Updated to version 340.76
 

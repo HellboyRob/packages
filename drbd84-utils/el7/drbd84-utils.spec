@@ -1,7 +1,7 @@
 %define real_name drbd-utils
 
 Name:    drbd84-utils
-Version: 8.9.1
+Version: 8.9.6
 Release: 1%{?dist}
 Group:   System Environment/Kernel
 License: GPLv2+
@@ -14,6 +14,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: flex
 BuildRequires: udev
 BuildRequires: libxslt
+BuildRequires: xmlto
 
 Requires: udev
 Requires(post):   systemd-units
@@ -65,34 +66,19 @@ It is not required when the init system used is systemd.
 %configure \
     --with-initdir="%{_initrddir}" \
     --with-rgmanager \
-    --with-initscripttype=both
-WITH_HEARTBEAT=yes %{__make} %{?_smp_mflags}
+    --with-initscripttype=both \
+    --without-83support
+%{__make} %{?_smp_mflags}
 
 %install
 %{__rm} -rf %{buildroot}
-WITH_HEARTBEAT=yes %{__make} install DESTDIR="%{buildroot}"
-pushd scripts
-WITH_HEARTBEAT=yes %{__make} install-heartbeat DESTDIR="%{buildroot}"
-popd
-
-install -d -m 755 %{buildroot}/%{_unitdir}
-mv %{buildroot}/drbd.service %{buildroot}/%{_unitdir}/drbd.service
-chmod 644 %{buildroot}/%{_unitdir}/drbd.service
-
-install -d -m 755 %{buildroot}/%{_sysconfdir}/udev/rules.d
-mv %{buildroot}/lib/udev/65-drbd.rules %{buildroot}/%{_sysconfdir}/udev/rules.d/65-drbd.rules
+%{__make} install DESTDIR="%{buildroot}"
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %post
 %systemd_post drbd.service
-
-for i in $(seq 0 15); do
-    if [ ! -b /dev/drbd$i ]; then
-        mknod -m0660 /dev/drbd$i b 147 $i
-    fi
-done
 
 if /usr/bin/getent group | grep -q ^haclient; then
     chgrp haclient /usr/sbin/drbdsetup
@@ -112,25 +98,16 @@ fi
 %doc ChangeLog COPYING README scripts/drbd.conf.example
 %doc %{_mandir}/man5/drbd.conf.5*
 %doc %{_mandir}/man5/drbd.conf-*
-%doc %{_mandir}/man8/drbd.8*
-%doc %{_mandir}/man8/drbd-*
-%doc %{_mandir}/man8/drbdadm.8*
-%doc %{_mandir}/man8/drbdadm-*
-%doc %{_mandir}/man8/drbddisk.8*
-%doc %{_mandir}/man8/drbddisk-*
-%doc %{_mandir}/man8/drbdmeta.8*
-%doc %{_mandir}/man8/drbdmeta-*
-%doc %{_mandir}/man8/drbdsetup.8*
-%doc %{_mandir}/man8/drbdsetup-*
-%config %{_sysconfdir}/bash_completion.d/drbdadm*
-%config %{_sysconfdir}/udev/rules.d/65-drbd.rules*
+%doc %{_mandir}/man8/drbd*
+%config %{_sysconfdir}/bash_completion.d/drbdadm
+%config %{_prefix}/lib/udev/rules.d/65-drbd.rules
 %config(noreplace) %{_sysconfdir}/drbd.conf
 %dir %{_sysconfdir}/drbd.d/
 %config(noreplace) %{_sysconfdir}/drbd.d/global_common.conf
 %config %{_unitdir}/drbd.service
 %dir %{_localstatedir}/lib/drbd/
-/lib/drbd/drbdadm-83
-/lib/drbd/drbdsetup-83
+%dir /lib/drbd/
+/lib/drbd/drbd
 /lib/drbd/drbdadm-84
 /lib/drbd/drbdsetup-84
 %{_sbindir}/drbdadm
@@ -151,6 +128,7 @@ fi
 %{_prefix}/lib/drbd/snapshot-resync-target-lvm.sh
 %{_prefix}/lib/drbd/stonith_admin-fence-peer.sh
 %{_prefix}/lib/drbd/unsnapshot-resync-target-lvm.sh
+%{_prefix}/lib/tmpfiles.d/drbd.conf
 
 ### heartbeat
 %{_sysconfdir}/ha.d/resource.d/drbddisk
@@ -174,6 +152,25 @@ fi
 %config %{_initrddir}/drbd
 
 %changelog
+* Wed Oct  5 2016 Hiroshi Fujishima <h-fujishima@sakura.ad.jp> - 8.9.6-1
+- Update to version 8.9.6.
+- BuildRequires: xmlto added by A. Yagi for building in mock.
+
+* Mon Jan  4 2016 Hiroshi Fujishima <h-fujishima@sakura.ad.jp> - 8.9.5-1
+- Update to version 8.9.5.
+
+* Sat Aug 15 2015 Akemi Yagi <toracat@elrepo.org> - 8.9.3-1.1
+- Patch drbd.ocf to the version from 8.9.3-2 (bugs #578 and #589)
+
+* Wed Jun 24 2015 Hiroshi Fujishima <h-fujishima@sakura.ad.jp> - 8.9.3-1
+- Update to version 8.9.3.
+
+* Sat May 16 2015 Akemi Yagi <toracat@elrepo.org> - 8.9.2-2
+- Added missing line %dir %{_localstatedir}/lib/drbd/ (bug#571)
+
+* Fri Apr 10 2015 Philip J Perry <phil@elrepo.org> - 8.9.2-1
+- Update to version 8.9.2.
+
 * Sun Aug 17 2014 Jun Futagawa <jfut@integ.jp> - 8.9.1-1
 - Updated to version 8.9.1
 

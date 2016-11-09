@@ -1,7 +1,7 @@
 /*
  *  nvidia-detect - A utility to detect NVIDIA graphics cards
  *
- *  Copyright (C) 2013-2015 Philip J Perry <phil@elrepo.org>
+ *  Copyright (C) 2013-2016 Philip J Perry <phil@elrepo.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #include "nvidia-detect.h"
 
 #define PROGRAM_NAME		"nvidia-detect"
-#define NVIDIA_VERSION		346.47
+#define NVIDIA_VERSION		"367.44"
 
 #ifndef PCI_VENDOR_ID_INTEL
 #define PCI_VENDOR_ID_INTEL	0x8086
@@ -39,14 +39,14 @@
 #endif
 
 /* Only recommend elrepo drivers on RHEL*/
-#if (RHEL_MAJOR == 5 || RHEL_MAJOR == 6 || RHEL_MAJOR == 7)
-#define KMOD_NVIDIA		"kmod-nvidia"
+#if (RHEL_MAJOR == 6 || RHEL_MAJOR == 7)
+#define KMOD_NVIDIA			"kmod-nvidia"
 #define KMOD_NVIDIA_340XX	"kmod-nvidia-340xx"
 #define KMOD_NVIDIA_304XX	"kmod-nvidia-304xx"
-#define KMOD_NVIDIA_173XX	"kmod-nvidia-173xx"
-#define KMOD_NVIDIA_96XX	"kmod-nvidia-96xx"
+#define KMOD_NVIDIA_173XX	""	/* No longer supported on RHEL */
+#define KMOD_NVIDIA_96XX	""	/* No longer supported on RHEL */
 #else	/* make no specific package recommendation */
-#define KMOD_NVIDIA		""
+#define KMOD_NVIDIA			""
 #define KMOD_NVIDIA_340XX	""
 #define KMOD_NVIDIA_304XX	""
 #define KMOD_NVIDIA_173XX	""
@@ -54,11 +54,11 @@
 #endif
 
 /* Define the max Xorg Video Driver ABI supported by each NVIDIA driver */
-#define XORG_ABI_CURRENT	19	/* 343.36; Xorg 1.17 */
+#define XORG_ABI_CURRENT	20	/* 352.63; Xorg 1.18 */
 #define XORG_ABI_96XX		12	/* 96.43.23 */
 #define XORG_ABI_173XX		15	/* 173.14.39 */
-#define XORG_ABI_304XX		19	/* 304.125; Xorg 1.17 */
-#define XORG_ABI_340XX		19	/* 340.65; Xorg 1.17 */
+#define XORG_ABI_304XX		20	/* 304.131; Xorg 1.18 */
+#define XORG_ABI_340XX		20	/* 340.96; Xorg 1.18 */
 
 /* Change the default Xorg log file here if it's different */
 #define XORG_LOG_FILE	"/var/log/Xorg.0.log"
@@ -89,7 +89,7 @@ static struct pci_dev *dev;
 static bool opt_list = 0;
 static bool opt_xorg = 0;
 /* We can only return package names on RHEL */
-#if (RHEL_MAJOR == 5 || RHEL_MAJOR == 6 || RHEL_MAJOR == 7)
+#if (RHEL_MAJOR == 6 || RHEL_MAJOR == 7)
 static bool opt_verbose = 0;
 #else	/* do generic verbose output */
 static bool opt_verbose = 1;
@@ -107,7 +107,7 @@ static struct option longopts[] = {
 
 static void version(void)
 {
-	printf("Version: %3.2f\n", NVIDIA_VERSION);
+	printf("Version: %s\n", NVIDIA_VERSION);
 }
 
 static void usage(void)
@@ -121,7 +121,7 @@ static void usage(void)
 	printf("Detect NVIDIA graphics cards and determine the correct NVIDIA driver.\n\n");
 	printf("%s will return the following codes:\n\n", PROGRAM_NAME);
 	printf("0: No supported devices found\n");
-	printf("1: Device supported by the current %3.2f NVIDIA driver\n", NVIDIA_VERSION);
+	printf("1: Device supported by the current %s NVIDIA driver\n", NVIDIA_VERSION);
 	printf("2: Device supported by the legacy   96.xx NVIDIA driver\n");
 	printf("3: Device supported by the legacy  173.xx NVIDIA driver\n");
 	printf("4: Device supported by the legacy  304.xx NVIDIA driver\n");
@@ -140,8 +140,8 @@ static void list_all_nvidia_devices(void)
 {
 	size_t i;
 
-	printf("\n*** These devices are supported by the current %3.2f NVIDIA (kmod-nvidia) "
-		"driver ***\n\n", NVIDIA_VERSION);
+	printf("\n*** These devices are supported by the current %s NVIDIA "
+		"driver %s ***\n\n", NVIDIA_VERSION, KMOD_NVIDIA);
 	for (i = 0; i < ARRAY_SIZE(nv_current_pci_ids); i++) {
 		name = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
 			PCI_LOOKUP_VENDOR | PCI_LOOKUP_DEVICE,
@@ -150,8 +150,8 @@ static void list_all_nvidia_devices(void)
 		printf("[10de:%04x] %s\n", nv_current_pci_ids[i], name);
 	}
 
-	printf("\n*** These devices are supported by the legacy 340.xx NVIDIA (kmod-nvidia-340xx) "
-		"driver ***\n\n");
+	printf("\n*** These devices are supported by the legacy 340.xx NVIDIA "
+		"driver %s ***\n\n", KMOD_NVIDIA_340XX);
 	for (i = 0; i < ARRAY_SIZE(nv_340xx_pci_ids); i++) {
 		name = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
 			PCI_LOOKUP_VENDOR | PCI_LOOKUP_DEVICE,
@@ -160,8 +160,8 @@ static void list_all_nvidia_devices(void)
 		printf("[10de:%04x] %s\n", nv_340xx_pci_ids[i], name);
 	}
 
-	printf("\n*** These devices are supported by the legacy 304.xx NVIDIA (kmod-nvidia-304xx) "
-		"driver ***\n\n");
+	printf("\n*** These devices are supported by the legacy 304.xx NVIDIA "
+		"driver %s ***\n\n", KMOD_NVIDIA_304XX);
 	for (i = 0; i < ARRAY_SIZE(nv_304xx_pci_ids); i++) {
 		name = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
 			PCI_LOOKUP_VENDOR | PCI_LOOKUP_DEVICE,
@@ -170,8 +170,8 @@ static void list_all_nvidia_devices(void)
 		printf("[10de:%04x] %s\n", nv_304xx_pci_ids[i], name);
 	}
 
-	printf("\n*** These devices are supported by the legacy 173.xx NVIDIA (kmod-nvidia-173xx) "
-		"driver ***\n\n");
+	printf("\n*** These devices are supported by the legacy 173.xx NVIDIA "
+		"driver %s ***\n\n", KMOD_NVIDIA_173XX);
 	for (i = 0; i < ARRAY_SIZE(nv_173xx_pci_ids); i++) {
 		name = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
 			PCI_LOOKUP_VENDOR | PCI_LOOKUP_DEVICE,
@@ -180,8 +180,8 @@ static void list_all_nvidia_devices(void)
 		printf("[10de:%04x] %s\n", nv_173xx_pci_ids[i], name);
 	}
 
-	printf("\n*** These devices are supported by the legacy 96.xx NVIDIA (kmod-nvidia-96xx) "
-		"driver ***\n\n");
+	printf("\n*** These devices are supported by the legacy 96.xx NVIDIA "
+		"driver %s ***\n\n", KMOD_NVIDIA_96XX);
 	for (i = 0; i < ARRAY_SIZE(nv_96xx_pci_ids); i++) {
 		name = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
 			PCI_LOOKUP_VENDOR | PCI_LOOKUP_DEVICE,
@@ -199,7 +199,7 @@ static int nv_lookup_device_id(u_int16_t device_id)
 	for (i = 0; i < ARRAY_SIZE(nv_current_pci_ids); i++) {
 		if (device_id == nv_current_pci_ids[i]) {
 			if (opt_verbose) {
-				printf("This device requires the current %3.2f NVIDIA "
+				printf("This device requires the current %s NVIDIA "
 					"driver %s\n", NVIDIA_VERSION, KMOD_NVIDIA);
 			}
 			return NVIDIA_CURRENT;
@@ -270,14 +270,6 @@ static int terse_output(void)
 	}
 	else if (ret == NVIDIA_LEGACY_304XX) {
 		printf("%s\n", KMOD_NVIDIA_304XX);
-		return 0;
-	}
-	else if (ret == NVIDIA_LEGACY_173XX) {
-		printf("%s\n", KMOD_NVIDIA_173XX);
-		return 0;
-	}
-	else if (ret == NVIDIA_LEGACY_96XX) {
-		printf("%s\n", KMOD_NVIDIA_96XX);
 		return 0;
 	} else {
 	return 0;

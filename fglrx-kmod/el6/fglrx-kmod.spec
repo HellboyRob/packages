@@ -4,13 +4,17 @@
 
 # If kversion isn't defined on the rpmbuild line, define it here.
 # Due to CVE-2010-3081 patch, won't build against x86_64 kernels prior to 2.6.32-71.7.1.el6
-%{!?kversion: %define kversion 2.6.32-504.el6.%{_target_cpu}}
+%{!?kversion: %define kversion 2.6.32-573.el6.%{_target_cpu}}
 
-# built for RHEL6.6
-%define realversion 14.501.1003
+# built for RHEL6.7
+# in 14.12 the following line was useful; in 15.5 in their infinite wisdom ATI
+# decided to change the naming convention again so it's not used for now
+# leaving it in though as it might be needed for the next update
+%define realversion 15.302
+
 Name:    %{kmod_name}-kmod
-Version: 14.12
-Release: 1%{?dist}
+Version: 15.12
+Release: 2%{?dist}
 Group:   System Environment/Kernel
 License: Proprietary
 Summary: AMD %{kmod_name} kernel module(s)
@@ -23,10 +27,10 @@ ExclusiveArch: i686 x86_64
 # I think AMD makes a special effort to make sure that no one can infer the name
 # of a release from the previous one
 # Sources.
-# http://www2.ati.com/drivers/linux/amd-catalyst-omega-14.12-linux-run-installers.zip
-Source0:  amd-driver-installer-%{realversion}-x86.x86_64.run
+# http://www2.ati.com/drivers/linux/radeon-crimson-15.12-15.302-151217a-297685e.zip
+Source0:  amd-driver-installer-15.302-x86.x86_64.run
 Source10: kmodtool-%{kmod_name}-el6.sh
-NoSource: 0
+#NoSource: 0
 
 # Magic hidden here.
 %{expand:%(sh %{SOURCE10} rpmtemplate %{kmod_name} %{kversion} "")}
@@ -87,9 +91,27 @@ find %{buildroot} -type f -name \*.ko -exec %{__chmod} u+x \{\} \;
 %{__rm} -rf %{buildroot}
 
 %changelog
-* Fri Jan 09 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 14.12-1.el6_6.elrepo
-- Update to version 14.12
-- Fix again the URL to the drivers' web page
+* Tue Aug 16 2016 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.12-2.el6.elrepo
+- Bump version to keep in sync with fglrx-x11-drv
+
+* Sun Feb 14 2016 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.12-1.el6.elrepo
+- Update to version 15.12
+
+* Fri Dec 18 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.11-1.el6.elrepo
+- Update to version 15.11
+
+* Thu Oct 29 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.9-1.el6.elrepo
+- Update to version 15.9
+- Strongly suggested to update due to CVE-2015-7724
+
+* Thu Jul 28 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.7-1.el6.elrepo
+- Update to version 15.7
+
+* Fri Jun 26 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.5-2.el6.elrepo
+- rebuilt to fix incorrect kernel deps
+
+* Thu Jun 25 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.5-1.el6.elrepo
+- Update to version 15.5
 
 * Sun Oct 19 2014 Manuel Wolfshant <wolfy@fedoraproject.org> - 14.9-1.el6_6.elrepo
 - Update to version 14.9.

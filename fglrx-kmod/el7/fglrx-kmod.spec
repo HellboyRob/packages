@@ -2,24 +2,31 @@
 %define kmod_name fglrx
 
 # If kversion isn't defined on the rpmbuild line, define it here.
-%{!?kversion: %define kversion 3.10.0-123.el7.%{_target_cpu}}
+%{!?kversion: %define kversion 3.10.0-229.el7.%{_target_cpu}}
 
-# built for RHEL6.6
-%define realversion 14.301.1001
+# in 14.12 the following line was useful; in 15.5 in their infinite wisdom ATI
+# decided to change the naming convention again so it's not used for now
+# leaving it in though for the next version
+# built for RHEL7.1
+%define realversion 15.302
+
 Name:    %{kmod_name}-kmod
-Version: 14.9
-Release: 1%{?dist}
+Version: 15.12
+Release: 4%{?dist}
 Group:   System Environment/Kernel
 License: Proprietary
 Summary: AMD %{kmod_name} kernel module(s)
-URL:     http://support.amd.com/us/gpudownload/linux/Pages/radeon_linux.aspx
+#AMD prohibits deep linking but loves redirects
+URL:     http://support.amd.com/en-us/download
 
 BuildRequires: redhat-rpm-config
 ExclusiveArch: i686 x86_64
 
+# I think AMD makes a special effort to make sure that no one can infer the name
+# of a release from the previous one
 # Sources.
-# http://www2.ati.com/drivers/linux/amd-driver-installer-catalyst-14.9-linux-x86.x86_64.zip
-Source0:  amd-driver-installer-%{realversion}-x86.x86_64.run
+# http://www2.ati.com/drivers/linux/radeon-crimson-15.12-15.302-151217a-297685e.zip
+Source0:  amd-driver-installer-15.302-x86.x86_64.run
 Source10: kmodtool-%{kmod_name}-el7.sh
 NoSource: 0
 
@@ -47,9 +54,6 @@ sh %{SOURCE0} --extract atipkg
 %ifarch x86_64
 %{__cp} -a atipkg/common/* atipkg/arch/x86_64/* _kmod_build_/
 %endif
-
-# Suppress warning message
-#echo 'This is a dummy file created to suppress this warning: could not find /lib/modules/fglrx/build_mod/2.6.x/.libfglrx_ip.a.GCC4.cmd for /lib/modules/fglrx/build_mod/2.6.x/libfglrx_ip.a.GCC4' > _kmod_build_/lib/modules/fglrx/build_mod/2.6.x/.libfglrx_ip.a.GCC4.cmd
 
 # proper permissions
 find _kmod_build_/lib/modules/fglrx/build_mod/ -type f | xargs chmod 0644
@@ -96,6 +100,37 @@ done
 %{__rm} -rf %{buildroot}
 
 %changelog
+* Sun Aug 14 2016 manuel wolfshant - 15.12-4.el7.elrepo
+- Bump version to keep in sync with fglrx-x11-drv
+
+* Mon Mar 28 2016 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.12-3.el7.elrepo
+- Bump version to keep in sync with fglrx-x11-drv
+
+* Sun Mar 27 2016 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.12-2.el7.elrepo
+- Bump version to keep in sync with fglrx-x11-drv
+
+* Sun Feb 14 2016 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.12-1.el7.elrepo
+- Update to version 15.12
+
+* Wed Feb 10 2016 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.11-3
+- keep in sync with fglrx-x11-drv
+
+* Thu Dec 24 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.11-2.el7.elrepo
+- Bump version to keep in sync with fglrx-x11-drv
+
+* Fri Dec 18 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.11-1.el7.elrepo
+- Update to version 15.11
+
+* Sat Oct 31 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.9-1.el7.elrepo
+- Update to version 15.9
+- Strongly suggested to update due to CVE-2015-7724
+
+* Thu Jun 25 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 15.5-1.el7.elrepo
+- Update to version 15.5
+
+* Sun Jan 11 2015 Manuel "lonely wolf" Wolfshant <wolfy@fedoraproject.org> - 14.12-1.el7.elrepo
+- Update to version 14.12
+
 * Sun Oct 19 2014 Manuel Wolfshant <wolfy@fedoraproject.org> - 14.9-1.el7.elrepo
 - Initial version for EL7
 

@@ -1,12 +1,11 @@
 # Define the kmod package name here.
 %define	 kmod_name nvidia
 
-# build against rhel6.5 (2.6.32-431.el6) for backwards compatibility
 # If kversion isn't defined on the rpmbuild line, define it here.
-%{!?kversion: %define kversion 2.6.32-431.el6.%{_target_cpu}}
+%{!?kversion: %define kversion 2.6.32-573.el6.%{_target_cpu}}
 
 Name:	 %{kmod_name}-kmod
-Version: 346.35
+Version: 367.57
 Release: 1%{?dist}
 Group:	 System Environment/Kernel
 License: Proprietary
@@ -21,6 +20,7 @@ ExclusiveArch:	i686 x86_64
 Source0:  ftp://download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-Linux-x86-%{version}.run
 Source1:  ftp://download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}.run
 Source10: kmodtool-%{kmod_name}-el6.sh
+Source15: nvidia-provides.sh
 
 NoSource: 0
 NoSource: 1
@@ -32,6 +32,9 @@ NoSource: 1
 # Disable building of the debug package(s).
 %define	debug_package %{nil}
 
+# Define for nvidia-provides
+%define __find_provides %{SOURCE15}
+
 %description
 This package provides the proprietary NVIDIA OpenGL kernel driver module.
 It is built to depend upon the specific ABI provided by a range of releases
@@ -40,6 +43,8 @@ of the same variant of the Linux kernel and not on any one specific build.
 %prep
 %setup -q -c -T
 echo "override %{kmod_name} * weak-updates/%{kmod_name}" > kmod-%{kmod_name}.conf
+echo "override %{kmod_name}-drm * weak-updates/%{kmod_name}" >> kmod-%{kmod_name}.conf
+echo "override %{kmod_name}-modeset * weak-updates/%{kmod_name}" >> kmod-%{kmod_name}.conf
 %ifarch x86_64
 echo "override %{kmod_name}-uvm * weak-updates/%{kmod_name}" >> kmod-%{kmod_name}.conf
 %endif
@@ -59,11 +64,6 @@ export SYSSRC=%{_usrsrc}/kernels/%{kversion}
 pushd _kmod_build_/kernel
 %{__make} module
 popd
-%ifarch x86_64
-pushd _kmod_build_/kernel/uvm
-%{__make} module
-popd
-%endif
 
 %install
 export INSTALL_MOD_PATH=%{buildroot}
@@ -72,11 +72,6 @@ ksrc=%{_usrsrc}/kernels/%{kversion}
 pushd _kmod_build_/kernel
 %{__make} -C "${ksrc}" modules_install M=$PWD
 popd
-%ifarch x86_64
-pushd _kmod_build_/kernel/uvm
-%{__make} -C "${ksrc}" modules_install M=$PWD
-popd
-%endif
 %{__install} -d %{buildroot}%{_sysconfdir}/depmod.d/
 %{__install} kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
 # Remove the unrequired files.
@@ -86,6 +81,61 @@ popd
 %{__rm} -rf %{buildroot}
 
 %changelog
+* Tue Oct 11 2016 Philip J Perry <phil@elrepo.org> - 367.57-1
+- Updated to version 367.57
+
+* Sat Aug 27 2016 Philip J Perry <phil@elrepo.org> - 367.44-1
+- Updated to version 367.44
+
+* Sat Jul 16 2016 Philip J Perry <phil@elrepo.org> - 367.35-1
+- Updated to version 367.35
+
+* Tue Jun 14 2016 Philip J Perry <phil@elrepo.org> - 367.27-1
+- Updated to version 367.27
+- Adds nvidia-drm kernel module
+
+* Wed May 25 2016 Philip J Perry <phil@elrepo.org> - 361.45.11-1
+- Updated to version 361.45.11
+
+* Thu Mar 31 2016 Philip J Perry <phil@elrepo.org> - 361.42-1
+- Updated to version 361.42
+
+* Tue Mar 01 2016 Philip J Perry <phil@elrepo.org> - 361.28-1
+- Updated to version 361.28
+- Adds nvidia-modeset kernel module
+
+* Sun Jan 31 2016 Philip J Perry <phil@elrepo.org> - 352.79-1
+- Updated to version 352.79
+
+* Fri Nov 20 2015 Philip J Perry <phil@elrepo.org> - 352.63-1
+- Updated to version 352.63
+
+* Sat Oct 17 2015 Philip J Perry <phil@elrepo.org> - 352.55-1
+- Updated to version 352.55
+
+* Sat Aug 29 2015 Philip J Perry <phil@elrepo.org> - 352.41-1
+- Updated to version 352.41
+
+* Sat Aug 01 2015 Philip J Perry <phil@elrepo.org> - 352.30-1
+- Updated to version 352.30
+- Built against RHEL-6.7 kernel
+
+* Fri Jul 03 2015 Philip J Perry <phil@elrepo.org> - 352.21-3
+- Add blacklist() provides.
+- Revert modalias() provides.
+
+* Wed Jul 01 2015 Philip J Perry <phil@elrepo.org> - 352.21-2
+- Add modalias() provides.
+
+* Wed Jun 17 2015 Philip J Perry <phil@elrepo.org> - 352.21-1
+- Updated to version 352.21
+
+* Wed Apr 08 2015 Philip J Perry <phil@elrepo.org> - 346.59-1
+- Updated to version 346.59
+
+* Wed Feb 25 2015 Philip J Perry <phil@elrepo.org> - 346.47-1
+- Updated to version 346.47
+
 * Sat Jan 17 2015 Philip J Perry <phil@elrepo.org> - 346.35-1
 - Updated to version 346.35
 - Drops support of older G8x, G9x, and GT2xx GPUs

@@ -35,8 +35,6 @@
 #define DRV_VERSION	"1.5.1"
 #define DRV_RELDATE	"2010-10-09"
 
-#define CONFIG_VIA_RHINE_MMIO
-
 #include <linux/types.h>
 
 /* A few user-configurable values.
@@ -113,6 +111,7 @@ static const int multicast_filter_limit = 32;
 #include <asm/irq.h>
 #include <asm/uaccess.h>
 #include <linux/dmi.h>
+#include <linux/version.h>
 
 /* These identify the driver base version and may not be removed. */
 static const char version[] =
@@ -138,6 +137,14 @@ MODULE_PARM_DESC(avoid_D3, "Avoid power state D3 (work-around for broken BIOSes)
 
 #define MCAM_SIZE	32
 #define VCAM_SIZE	32
+
+/* Compatibiliy fixes for RHEL7_2 */
+#if (RHEL_MAJOR == 7 && RHEL_MINOR >= 2)
+#define vlan_tx_tag_get skb_vlan_tag_get
+#define vlan_tx_tag_present skb_vlan_tag_present
+#define u64_stats_fetch_begin_bh u64_stats_fetch_begin_irq
+#define u64_stats_fetch_retry_bh u64_stats_fetch_retry_irq
+#endif
 
 /*
 		Theory of Operation

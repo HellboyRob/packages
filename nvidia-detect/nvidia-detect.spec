@@ -1,5 +1,5 @@
 Name:    nvidia-detect
-Version: 346.47
+Version: 367.44
 Release: 1%{?dist}
 Group:   Applications/System
 License: GPLv2
@@ -37,6 +37,40 @@ A utility to detect NVIDIA graphics cards.
 %{_bindir}/nvidia-detect
 
 %changelog
+* Wed Aug 24 2016 Philip J Perry <phil@elrepo.org> - 367.44-1
+- Add support for detection of devices added to 367.44 driver release
+
+* Sat Jun 18 2016 Philip J Perry <phil@elrepo.org> - 367.27-1
+- Add support for detection of devices added to 367.27 driver release
+
+* Wed May 25 2016 Philip J Perry <phil@elrepo.org> - 361.45.11-1
+- Add support for detection of devices added to 361.45.11 driver release
+
+* Thu Mar 31 2016 Philip J Perry <phil@elrepo.org> - 361.42-1
+- Add support for detection of devices added to 361.42 driver release
+
+* Sun Mar 06 2016 Philip J Perry <phil@elrepo.org> - 361.28-1
+- Add support for detection of devices added to 361.28 driver release
+
+* Wed Nov 25 2015 Philip J Perry <phil@elrepo.org> - 352.63-1
+- Add support for detection of devices added to 352.63 driver release
+- Update Xorg Video Driver ABI versions
+
+* Sat Oct 17 2015 Philip J Perry <phil@elrepo.org> - 352.55-1
+- Add support for detection of devices added to 352.55 driver release
+
+* Sat Aug 29 2015 Philip J Perry <phil@elrepo.org> - 352.41-1
+- Add support for detection of devices added to 352.41 driver release
+
+* Sat Aug 01 2015 Philip J Perry <phil@elrepo.org> - 352.30-1
+- Add support for detection of devices added to 352.30 driver release
+
+* Wed Jun 17 2015 Philip J Perry <phil@elrepo.org> - 352.21-1
+- Add support for detection of devices added to 352.21 driver release
+
+* Wed Apr 08 2015 Philip J Perry <phil@elrepo.org> - 346.59-1
+- Add support for detection of devices added to 346.59 driver release
+
 * Wed Feb 25 2015 Philip J Perry <phil@elrepo.org> - 346.47-1
 - Add support for detection of devices added to 346.47 driver release
 
